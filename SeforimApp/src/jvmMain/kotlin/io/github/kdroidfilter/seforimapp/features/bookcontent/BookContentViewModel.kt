@@ -707,9 +707,41 @@ class BookContentViewModel(
         }
     }
 
+    /**
+     * Resolves a catalog book against the active database.
+     *
+     * catalog.pb may have been generated from a different build of the library, so its numeric
+     * book IDs are not safe to use with an externally supplied database. Prefer heRef, which is
+     * stable across database regenerations, and only trust the numeric ID when the loaded row
+     * describes the same book.
+     */
+    private suspend fun resolveActiveDatabaseBook(book: Book): Book? {
+        val byId = repository.getBookCore(book.id)
+        val idMatches =
+            byId != null &&
+                when {
+                    !book.heRef.isNullOrBlank() && !byId.heRef.isNullOrBlank() -> book.heRef == byId.heRef
+                    else -> book.title == byId.title && book.categoryId == byId.categoryId
+                }
+        if (idMatches) return byId
+
+        book.heRef
+            ?.takeIf { it.isNotBlank() }
+            ?.let { stableRef -> repository.getBookByHeRef(stableRef) }
+            ?.let { return it }
+
+        // Older catalogs may not contain heRef. Keep an exact-title fallback for them;
+        // never use a LIKE-only match because that could silently open a different book.
+        val titleMatches = repository.findBooksByTitleLikeCore(book.title, limit = 50)
+        return titleMatches.firstOrNull { candidate ->
+            candidate.title == book.title &&
+                (candidate.categoryId == book.categoryId || book.categoryId <= 0)
+        } ?: titleMatches.singleOrNull { it.title == book.title }
+    }
+
     /** Loads a book */
     private suspend fun loadBook(book: Book) {
-        val resolvedBook = repository.getBookCore(book.id) ?: book
+        val resolvedBook = resolveActiveDatabaseBook(book) ?: return
         val previousBook = stateManager.state.value.navigation.selectedBook
 
         // On a book change, flip to loading BEFORE selecting the new book. selectBook() triggers a
@@ -935,7 +967,8 @@ class BookContentViewModel(
     }
 
     /** Opens a book in a new tab */
-    private fun openBookInNewTab(book: Book) {
+    private suspend fun openBookInNewTab(book: Book) {
+        val resolvedBook = resolveActiveDatabaseBook(book) ?: return
         val newTabId =
             java.util.UUID
                 .randomUUID()
@@ -954,7 +987,7 @@ class BookContentViewModel(
                             isBookTreeVisible = fromNav.isBookTreeVisible,
                             bookTreeScrollIndex = fromNav.bookTreeScrollIndex,
                             bookTreeScrollOffset = fromNav.bookTreeScrollOffset,
-                            selectedBookId = book.id,
+                            selectedBookId = resolvedBook.id,
                             // Mimic the previous UX: show TOC on first open in the new tab.
                             isTocVisible = true,
                             // Reset per-book scroll/anchor in the new tab to start clean.
@@ -974,7 +1007,7 @@ class BookContentViewModel(
                 current.copy(
                     bookContent =
                         current.bookContent.copy(
-                            selectedBookId = book.id,
+                            selectedBookId = resolvedBook.id,
                             isTocVisible = true,
                         ),
                     search = null,
@@ -985,7 +1018,7 @@ class BookContentViewModel(
         // Navigate directly to book content in the new tab
         tabsViewModel.openTab(
             TabsDestination.BookContent(
-                bookId = book.id,
+                bookId = resolvedBook.id,
                 tabId = newTabId,
             ),
         )
