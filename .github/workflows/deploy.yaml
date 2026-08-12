@@ -50,7 +50,7 @@ jobs:
             graalvm: true
 
           # Windows x64 - GraalVM
-          - os: windows-latest
+          - os: windows-2022
             arch: amd64
             rust_target: x86_64-pc-windows-msvc
             graalvm: true
@@ -83,8 +83,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          tag=$(git describe --tags --abbrev=0)
-          echo "Using latest tag for version: $tag"
+          tag=$(git describe --tags --abbrev=0 2>/dev/null || printf 'v0.0.%s' "$GITHUB_RUN_NUMBER")
+          echo "Using release tag for version: $tag"
           echo "GITHUB_REF=refs/tags/$tag" >> "$GITHUB_ENV"
 
       - name: Compute version and asset name
@@ -257,7 +257,7 @@ jobs:
           if [ "${{ github.event_name }}" = "push" ]; then
             TAG="${GITHUB_REF#refs/tags/}"
           else
-            TAG="$(git describe --tags --abbrev=0)"
+            TAG="$(git describe --tags --abbrev=0 2>/dev/null || printf 'v0.0.%s' "$GITHUB_RUN_NUMBER")"
           fi
           echo "TAG=$TAG" >> "$GITHUB_ENV"
           echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
