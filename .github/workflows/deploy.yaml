@@ -107,22 +107,8 @@ jobs:
 
       - name: Setup Nucleus
         uses: kdroidFilter/Nucleus/.github/actions/setup-nucleus@789704a9b63c5b2a0ff4d6e1cd85711ab2e4286b
-
-      - name: Setup GraalVM (Liberica NIK)
-        if: matrix.graalvm
-        uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '25'
-          distribution: 'liberica'
-
-      - name: Remove stale JBR from PATH
-        if: runner.os == 'Windows' && matrix.graalvm
-        shell: pwsh
-        run: |
-          $cleanPath = (($env:PATH -split ';') | Where-Object {
-            $_ -and $_ -notmatch '[\\/]jbr[\\/]' -and $_ -notmatch '[\\/]jbrsdk-'
-          }) -join ';'
-          "PATH=$cleanPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          graalvm: ${{ matrix.graalvm }}
 
       # Linux builds
       - name: Build & stage Linux .deb
