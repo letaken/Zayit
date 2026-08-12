@@ -88,7 +88,7 @@ jobs:
             graalvm: true
 
           # Windows x64 (GraalVM)
-          - os: windows-latest
+          - os: windows-2022
             arch: amd64
             build_task: ":SeforimApp:packageGraalvmNsis"
             graalvm: true
@@ -116,13 +116,8 @@ jobs:
 
       - name: Setup Nucleus
         uses: kdroidFilter/Nucleus/.github/actions/setup-nucleus@789704a9b63c5b2a0ff4d6e1cd85711ab2e4286b
-
-      - name: Setup GraalVM (Liberica NIK)
-        if: matrix.graalvm
-        uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '25'
-          distribution: 'liberica'
+          graalvm: ${{ matrix.graalvm }}
 
       # Build
       - name: Build
