@@ -7,6 +7,15 @@ import java.net.URL
 object Versioning {
     @Suppress("UNUSED_PARAMETER")
     fun resolveVersion(project: Project): String {
+        val explicitReleaseVersion =
+            System.getenv("ZAYIT_RELEASE_VERSION")
+                ?.trim()
+                ?.removePrefix("v")
+                ?.takeIf { it.isNotBlank() }
+        if (explicitReleaseVersion != null) {
+            return explicitReleaseVersion
+        }
+
         val fromEnv = resolveFromGitHubRef()
         if (!fromEnv.isNullOrBlank()) {
             return fromEnv
