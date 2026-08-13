@@ -109,12 +109,6 @@ jobs:
 
           # macOS Intel (x64)
           - os: macos-26-intel
-            arch: x64
-            build_task: ":SeforimApp:packageGraalvmDmg"
-            graalvm: true
-
-          # macOS Intel (x64)
-          - os: macos-26-intel
             arch: amd64
             build_task: ":SeforimApp:packageGraalvmDmg"
             graalvm: true
