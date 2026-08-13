@@ -181,7 +181,8 @@ fun EndVerticalBar(
         },
         bottomContent = {
             val targumEnabled = selectedBook?.hasTargumConnection == true
-            val commentaryEnabled = selectedBook?.hasCommentaryConnection == true
+            val commentaryEnabled =
+                selectedBook?.hasCommentaryConnection == true || lineAvailability.commentariesAvailable == true
             val sourcesEnabled = selectedBook?.hasSourceConnection == true
             val linksEnabled = (selectedBook?.hasReferenceConnection == true) || (selectedBook?.hasOtherConnection == true)
 
