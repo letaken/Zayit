@@ -2,7 +2,6 @@ package io.github.kdroidfilter.seforimapp.pagination
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import io.github.kdroidfilter.seforimlibrary.core.models.ConnectionType
 import io.github.kdroidfilter.seforimlibrary.dao.repository.CommentaryWithText
 import io.github.kdroidfilter.seforimlibrary.dao.repository.SeforimRepository
 import kotlin.math.max
@@ -58,7 +57,7 @@ class CommentsForLineOrTocPagingSource(
                 repository.getCommentariesForLineRange(
                     lineIds = ids,
                     activeCommentatorIds = commentatorIds,
-                    connectionTypes = setOf(ConnectionType.COMMENTARY),
+                    connectionTypes = COMMENTARY_CONNECTION_TYPES,
                     offset = offset,
                     limit = limit,
                 )
