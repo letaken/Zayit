@@ -5,10 +5,57 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag (for example: v1.0.0). Leave empty to generate one.'
+        required: false
+        type: string
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - name: Checkout tag history
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Determine release tag and version
+        id: release
+        shell: bash
+        env:
+          REQUESTED_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "push" ]; then
+            tag="$GITHUB_REF_NAME"
+          elif [ -n "$REQUESTED_TAG" ]; then
+            tag="$REQUESTED_TAG"
+            [[ "$tag" == v* ]] || tag="v$tag"
+          else
+            tag="v0.0.$GITHUB_RUN_NUMBER"
+          fi
+
+          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Invalid release tag '$tag'. Expected a value such as v1.2.3."
+            exit 1
+          fi
+
+          version="${tag#v}"
+          echo "Release tag: $tag"
+          echo "Release version: $version"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: prepare
     runs-on: ${{ matrix.os }}
+    env:
+      TAG: ${{ needs.prepare.outputs.tag }}
+      VERSION: ${{ needs.prepare.outputs.version }}
     strategy:
       fail-fast: false
       matrix:
@@ -78,21 +125,11 @@ jobs:
           fetch-depth: 0
           submodules: recursive
 
-      - name: Normalize version for manual runs
-        if: github.event_name == 'workflow_dispatch'
-        shell: bash
-        run: |
-          set -euo pipefail
-          tag=$(git describe --tags --abbrev=0 2>/dev/null || printf 'v0.0.%s' "$GITHUB_RUN_NUMBER")
-          echo "Using release tag for version: $tag"
-          echo "GITHUB_REF=refs/tags/$tag" >> "$GITHUB_ENV"
-
       - name: Compute version and asset name
         shell: bash
         run: |
           set -euo pipefail
-          tag="${GITHUB_REF#refs/tags/}"
-          echo "VERSION=${tag#v}" >> "$GITHUB_ENV"
+          echo "Using release tag $TAG (version $VERSION)"
           case "${{ matrix.os }}" in
             ubuntu*)  plat=linux ;;
             windows*) plat=windows ;;
@@ -232,30 +269,22 @@ jobs:
           if-no-files-found: error
 
   release:
-    needs: build
+    needs:
+      - prepare
+      - build
     runs-on: ubuntu-latest
     permissions:
       contents: write
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAG: ${{ needs.prepare.outputs.tag }}
+      VERSION: ${{ needs.prepare.outputs.version }}
 
     steps:
       - name: Checkout (for tag/notes context)
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
-      - name: Determine tag and version
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ "${{ github.event_name }}" = "push" ]; then
-            TAG="${GITHUB_REF#refs/tags/}"
-          else
-            TAG="$(git describe --tags --abbrev=0 2>/dev/null || printf 'v0.0.%s' "$GITHUB_RUN_NUMBER")"
-          fi
-          echo "TAG=$TAG" >> "$GITHUB_ENV"
-          echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
 
       - name: Download all release assets
         uses: actions/download-artifact@v7
