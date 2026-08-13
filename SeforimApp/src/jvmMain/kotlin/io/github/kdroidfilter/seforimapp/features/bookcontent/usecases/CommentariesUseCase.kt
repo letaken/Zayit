@@ -9,6 +9,7 @@ import io.github.kdroidfilter.seforimapp.features.bookcontent.state.BookContentS
 import io.github.kdroidfilter.seforimapp.features.bookcontent.state.CommentatorGroup
 import io.github.kdroidfilter.seforimapp.features.bookcontent.state.CommentatorItem
 import io.github.kdroidfilter.seforimapp.features.bookcontent.state.LineConnectionsSnapshot
+import io.github.kdroidfilter.seforimapp.pagination.COMMENTARY_CONNECTION_TYPES
 import io.github.kdroidfilter.seforimapp.pagination.CommentsForLineOrTocPagingSource
 import io.github.kdroidfilter.seforimapp.pagination.LineTargumPagingSource
 import io.github.kdroidfilter.seforimapp.pagination.MultiLineCommentsPagingSource
@@ -272,6 +273,7 @@ class CommentariesUseCase(
             repository.getCommentaryCharCountsForLineOrSection(
                 baseLineId = lineId,
                 activeCommentatorIds = setOf(commentatorId),
+                connectionTypes = COMMENTARY_CONNECTION_TYPES,
             )
         }.getOrElse { emptyList() }
 
@@ -287,6 +289,7 @@ class CommentariesUseCase(
             repository.getCommentaryCharCountsForLines(
                 lineIds = lineIds,
                 activeCommentatorIds = setOf(commentatorId),
+                connectionTypes = COMMENTARY_CONNECTION_TYPES,
             )
         }.getOrElse { emptyList() }
 
@@ -968,7 +971,7 @@ class CommentariesUseCase(
     ): LineConnectionsSnapshot {
         if (connections.isEmpty()) return LineConnectionsSnapshot()
 
-        val commentaries = connections.filter { it.link.connectionType == ConnectionType.COMMENTARY }
+        val commentaries = connections.filter { it.link.connectionType in COMMENTARY_CONNECTION_TYPES }
         val targumLinks = connections.filter { it.link.connectionType == ConnectionType.TARGUM }
         val sourceLinks = connections.filter { it.link.connectionType == ConnectionType.SOURCE }
 
@@ -993,7 +996,7 @@ class CommentariesUseCase(
         val commentaries =
             repository
                 .getCommentarySummariesForLines(baseIds)
-                .filter { it.link.connectionType == ConnectionType.COMMENTARY }
+                .filter { it.link.connectionType in COMMENTARY_CONNECTION_TYPES }
 
         if (commentaries.isEmpty()) return emptyList()
 
