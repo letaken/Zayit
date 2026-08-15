@@ -26,7 +26,7 @@ class MultiLineCommentsPagingSource(
                 repository.getCommentariesForLineRange(
                     lineIds = lineIds,
                     activeCommentatorIds = commentatorIds,
-                    connectionTypes = setOf(io.github.kdroidfilter.seforimlibrary.core.models.ConnectionType.COMMENTARY),
+                    connectionTypes = COMMENTARY_CONNECTION_TYPES,
                     offset = offset,
                     limit = limit,
                 )

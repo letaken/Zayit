@@ -77,11 +77,14 @@ fun EndVerticalBar(
     val selectedBook = uiState.navigation.selectedBook
     val noBookSelected = selectedBook == null
     val selectedLine = uiState.content.primaryLine
+    val selectedLineIds = uiState.content.selectedLineIds
+    val isManualMultiSelection =
+        selectedLineIds.size > 1 && !uiState.content.isTocEntrySelection
     val providers = uiState.providers
 
     val lineAvailability by produceState(
         initialValue = LineResourceAvailability(),
-        key1 = selectedLine?.id,
+        key1 = Triple(selectedLine?.id, selectedLineIds, isManualMultiSelection),
         key2 = providers,
     ) {
         if (selectedLine == null || providers == null) {
@@ -95,8 +98,12 @@ fun EndVerticalBar(
             }.getOrNull()?.isNotEmpty()
         val commentariesAvailable =
             runSuspendCatching {
-                providers.getAvailableCommentatorsForLine(selectedLine.id)
-            }.getOrNull()?.isNotEmpty()
+                if (isManualMultiSelection) {
+                    providers.getCommentatorGroupsForLines(selectedLineIds.toList()).isNotEmpty()
+                } else {
+                    providers.getAvailableCommentatorsForLine(selectedLine.id).isNotEmpty()
+                }
+            }.getOrNull()
         val sourcesAvailable =
             runSuspendCatching {
                 providers.getAvailableSourcesForLine(selectedLine.id)
@@ -181,7 +188,8 @@ fun EndVerticalBar(
         },
         bottomContent = {
             val targumEnabled = selectedBook?.hasTargumConnection == true
-            val commentaryEnabled = selectedBook?.hasCommentaryConnection == true
+            val commentaryEnabled =
+                selectedBook?.hasCommentaryConnection == true || lineAvailability.commentariesAvailable == true
             val sourcesEnabled = selectedBook?.hasSourceConnection == true
             val linksEnabled = (selectedBook?.hasReferenceConnection == true) || (selectedBook?.hasOtherConnection == true)
 
