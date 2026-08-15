@@ -107,6 +107,12 @@ jobs:
             build_task: ":SeforimApp:packageGraalvmDmg"
             graalvm: true
 
+          # macOS Intel (x64)
+          - os: macos-26-intel
+            arch: amd64
+            build_task: ":SeforimApp:packageGraalvmDmg"
+            graalvm: true
+
     steps:
       - name: Checkout source (with submodules)
         uses: actions/checkout@v6
