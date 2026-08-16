@@ -10,7 +10,7 @@ import app.cash.sqldelight.db.SqlDriver
  * table on this connection and exposes the column shape expected by generated SQLDelight queries.
  */
 internal fun installOtzariaLinkSchemaCompatibility(driver: SqlDriver) {
-    val columns =
+    val columnsQuery =
         driver.executeQuery(
             identifier = null,
             sql = "PRAGMA main.table_info(link)",
@@ -22,7 +22,8 @@ internal fun installOtzariaLinkSchemaCompatibility(driver: SqlDriver) {
                 QueryResult.Value(names)
             },
             parameters = 0,
-        ).value
+        )
+    val columns = columnsQuery.value
 
     if ("isDeclaredBase" in columns || "baseProvenance" !in columns) return
 
@@ -57,5 +58,5 @@ internal fun installOtzariaLinkSchemaCompatibility(driver: SqlDriver) {
             FROM main.link
             """.trimIndent(),
         parameters = 0,
-    ).value
+    )
 }
