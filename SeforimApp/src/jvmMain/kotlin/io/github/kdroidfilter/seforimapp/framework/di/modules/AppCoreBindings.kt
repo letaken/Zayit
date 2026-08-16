@@ -21,8 +21,8 @@ import io.github.kdroidfilter.seforimapp.features.search.SearchHomeViewModel
 import io.github.kdroidfilter.seforimapp.framework.database.CatalogCache
 import io.github.kdroidfilter.seforimapp.framework.database.PersistentSqliteDriver
 import io.github.kdroidfilter.seforimapp.framework.database.getDatabasePath
-import io.github.kdroidfilter.seforimapp.framework.database.installOtzariaLinkSchemaCompatibility
 import io.github.kdroidfilter.seforimapp.framework.database.getUserSettingsDatabasePath
+import io.github.kdroidfilter.seforimapp.framework.database.installOtzariaLinkSchemaCompatibility
 import io.github.kdroidfilter.seforimapp.framework.desktop.DesktopManager
 import io.github.kdroidfilter.seforimapp.framework.di.AppScope
 import io.github.kdroidfilter.seforimapp.framework.search.AcronymFrequencyCache
