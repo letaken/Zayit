@@ -12,7 +12,8 @@ class OtzariaLinkSchemaCompatibilityTest {
     fun exposesOtzariaBaseProvenanceAsTheExpectedBooleanColumn() {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         try {
-            driver.execute(
+            driver
+                .execute(
                 identifier = null,
                 sql =
                     """
@@ -31,7 +32,8 @@ class OtzariaLinkSchemaCompatibilityTest {
                 parameters = 0,
             )
                 .value
-            driver.execute(
+            driver
+                .execute(
                 identifier = null,
                 sql =
                     """
@@ -59,7 +61,8 @@ class OtzariaLinkSchemaCompatibilityTest {
     fun leavesTheNativeZayitSchemaUnchanged() {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         try {
-            driver.execute(
+            driver
+                .execute(
                 identifier = null,
                 sql =
                     """
@@ -91,7 +94,8 @@ class OtzariaLinkSchemaCompatibilityTest {
         driver: JdbcSqliteDriver,
         sql: String,
     ): List<Long> =
-        driver.executeQuery(
+        driver
+            .executeQuery(
             identifier = null,
             sql = sql,
             mapper = { cursor ->
@@ -110,7 +114,8 @@ class OtzariaLinkSchemaCompatibilityTest {
         sql: String,
         columnIndex: Int = 0,
     ): List<String> =
-        driver.executeQuery(
+        driver
+            .executeQuery(
             identifier = null,
             sql = sql,
             mapper = { cursor ->
