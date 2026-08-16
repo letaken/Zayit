@@ -12,8 +12,7 @@ class OtzariaLinkSchemaCompatibilityTest {
     fun exposesOtzariaBaseProvenanceAsTheExpectedBooleanColumn() {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         try {
-            driver
-                .execute(
+            driver.execute(
                 identifier = null,
                 sql =
                     """
@@ -31,9 +30,7 @@ class OtzariaLinkSchemaCompatibilityTest {
                     """.trimIndent(),
                 parameters = 0,
             )
-                .value
-            driver
-                .execute(
+            driver.execute(
                 identifier = null,
                 sql =
                     """
@@ -44,7 +41,6 @@ class OtzariaLinkSchemaCompatibilityTest {
                     """.trimIndent(),
                 parameters = 0,
             )
-                .value
 
             installOtzariaLinkSchemaCompatibility(driver)
 
@@ -61,8 +57,7 @@ class OtzariaLinkSchemaCompatibilityTest {
     fun leavesTheNativeZayitSchemaUnchanged() {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         try {
-            driver
-                .execute(
+            driver.execute(
                 identifier = null,
                 sql =
                     """
@@ -80,7 +75,6 @@ class OtzariaLinkSchemaCompatibilityTest {
                     """.trimIndent(),
                 parameters = 0,
             )
-                .value
 
             installOtzariaLinkSchemaCompatibility(driver)
 
@@ -93,39 +87,41 @@ class OtzariaLinkSchemaCompatibilityTest {
     private fun queryLongs(
         driver: JdbcSqliteDriver,
         sql: String,
-    ): List<Long> =
-        driver
-            .executeQuery(
-            identifier = null,
-            sql = sql,
-            mapper = { cursor ->
-                val values = mutableListOf<Long>()
-                while (cursor.next().value) {
-                    cursor.getLong(0)?.let(values::add)
-                }
-                QueryResult.Value(values)
-            },
-            parameters = 0,
-        )
-            .value
+    ): List<Long> {
+        val queryResult =
+            driver.executeQuery(
+                identifier = null,
+                sql = sql,
+                mapper = { cursor ->
+                    val values = mutableListOf<Long>()
+                    while (cursor.next().value) {
+                        cursor.getLong(0)?.let(values::add)
+                    }
+                    QueryResult.Value(values)
+                },
+                parameters = 0,
+            )
+        return queryResult.value
+    }
 
     private fun queryStrings(
         driver: JdbcSqliteDriver,
         sql: String,
         columnIndex: Int = 0,
-    ): List<String> =
-        driver
-            .executeQuery(
-            identifier = null,
-            sql = sql,
-            mapper = { cursor ->
-                val values = mutableListOf<String>()
-                while (cursor.next().value) {
-                    cursor.getString(columnIndex)?.let(values::add)
-                }
-                QueryResult.Value(values)
-            },
-            parameters = 0,
-        )
-            .value
+    ): List<String> {
+        val queryResult =
+            driver.executeQuery(
+                identifier = null,
+                sql = sql,
+                mapper = { cursor ->
+                    val values = mutableListOf<String>()
+                    while (cursor.next().value) {
+                        cursor.getString(columnIndex)?.let(values::add)
+                    }
+                    QueryResult.Value(values)
+                },
+                parameters = 0,
+            )
+        return queryResult.value
+    }
 }
