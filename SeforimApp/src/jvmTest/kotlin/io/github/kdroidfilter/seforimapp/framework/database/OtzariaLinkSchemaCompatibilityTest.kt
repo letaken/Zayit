@@ -29,7 +29,8 @@ class OtzariaLinkSchemaCompatibilityTest {
                     )
                     """.trimIndent(),
                 parameters = 0,
-            ).value
+            )
+                .value
             driver.execute(
                 identifier = null,
                 sql =
@@ -40,7 +41,8 @@ class OtzariaLinkSchemaCompatibilityTest {
                         (3, 1, 2, 3, 4, 5, 6, 7, 2)
                     """.trimIndent(),
                 parameters = 0,
-            ).value
+            )
+                .value
 
             installOtzariaLinkSchemaCompatibility(driver)
 
@@ -74,7 +76,8 @@ class OtzariaLinkSchemaCompatibilityTest {
                     )
                     """.trimIndent(),
                 parameters = 0,
-            ).value
+            )
+                .value
 
             installOtzariaLinkSchemaCompatibility(driver)
 
@@ -99,7 +102,8 @@ class OtzariaLinkSchemaCompatibilityTest {
                 QueryResult.Value(values)
             },
             parameters = 0,
-        ).value
+        )
+            .value
 
     private fun queryStrings(
         driver: JdbcSqliteDriver,
@@ -117,5 +121,6 @@ class OtzariaLinkSchemaCompatibilityTest {
                 QueryResult.Value(values)
             },
             parameters = 0,
-        ).value
+        )
+            .value
 }
